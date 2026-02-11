@@ -49,7 +49,7 @@ def create_app(config_class=Config):
     # Store cleanup manager in app for access in routes if needed
     app.cleanup_manager = cleanup_manager
 
-    app.logger.info("Image Optimization Flask app initialized successfully")
+    app.logger.info("pixel-craft Flask app initialized successfully")
 
     return app
 

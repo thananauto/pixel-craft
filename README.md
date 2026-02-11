@@ -1,6 +1,15 @@
-# Image Optimizer Web App
+# pixel-craft
 
 A production-ready Flask web application for optimizing JPEG, PNG, and WebP images with advanced controls and drag-and-drop upload functionality.
+
+## Theme
+
+pixel-craft features a vibrant, modern design with the following color palette:
+- **Bright Blue**: #51e2f5 - Primary interactive elements
+- **Border Blue Green**: #9df9ef - Borders and accents
+- **Background Ice Cold**: #a0d2eb - Page background
+- **Primary Pink Sand**: #ffa8b6 - Highlights and download actions
+- **Secondary Dark Sand**: #a28089 - Secondary actions and footer text
 
 ## Features
 

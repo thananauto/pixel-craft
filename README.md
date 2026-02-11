@@ -2,6 +2,12 @@
 
 A production-ready Flask web application for optimizing JPEG, PNG, and WebP images with advanced controls and drag-and-drop upload functionality.
 
+## Live Demo
+
+🚀 **Try it now**: [https://thanan.pythonanywhere.com/](https://thanan.pythonanywhere.com/)
+
+The app is currently deployed and running on PythonAnywhere. Upload your images and see the optimization in action!
+
 ## Theme
 
 pixel-craft features a clean, minimalist monochrome design with the following color palette:
@@ -112,6 +118,154 @@ docker-compose logs -f
 ```bash
 docker-compose down
 ```
+
+### Option 3: PythonAnywhere Deployment
+
+Deploy pixel-craft on PythonAnywhere for free hosting.
+
+**Live Example**: This app is currently running at [https://thanan.pythonanywhere.com/](https://thanan.pythonanywhere.com/)
+
+#### Step 1: Create PythonAnywhere Account
+1. Sign up at https://www.pythonanywhere.com
+2. Free tier provides 1 web app at `yourusername.pythonanywhere.com`
+
+#### Step 2: Upload Your Code
+
+**Option A: Using Git (Recommended)**
+```bash
+# In PythonAnywhere Bash console
+cd ~
+git clone https://github.com/yourusername/your-repo.git pixel-craft
+cd pixel-craft
+```
+
+**Option B: Manual Upload**
+- Use the "Files" tab to upload project files
+- Or use the "Upload a file" button
+
+#### Step 3: Create Virtual Environment
+```bash
+cd ~/pixel-craft
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### Step 4: Create uploads Directory
+```bash
+mkdir -p ~/pixel-craft/uploads
+chmod 755 ~/pixel-craft/uploads
+```
+
+#### Step 5: Configure Web App
+1. Go to **Web** tab → **Add a new web app**
+2. Choose **Manual configuration** → Select **Python 3.11**
+3. Set **Source code**: `/home/yourusername/pixel-craft`
+4. Set **Working directory**: `/home/yourusername/pixel-craft`
+
+#### Step 6: Configure WSGI File
+Click on the WSGI configuration file link and replace contents with:
+
+```python
+import sys
+import os
+
+# Add your project directory to the sys.path
+project_home = '/home/yourusername/pixel-craft'
+if project_home not in sys.path:
+    sys.path = [project_home] + sys.path
+
+# Set environment variables
+os.environ['SECRET_KEY'] = 'your-secure-secret-key-here'
+os.environ['FLASK_ENV'] = 'production'
+
+# Import your Flask app
+from app import app as application
+```
+
+**Important**: Replace `yourusername` with your actual PythonAnywhere username.
+
+#### Step 7: Configure Virtual Environment
+In the **Web** tab, enter the virtual environment path:
+```
+/home/yourusername/pixel-craft/venv
+```
+
+#### Step 8: Configure Static Files
+In the **Web** tab's **Static files** section, add:
+- **URL**: `/static/`
+- **Directory**: `/home/yourusername/pixel-craft/static`
+
+#### Step 9: Reload Web App
+Click the green **Reload** button in the Web tab and visit:
+```
+https://yourusername.pythonanywhere.com
+```
+
+**Example**: [https://thanan.pythonanywhere.com/](https://thanan.pythonanywhere.com/)
+
+#### Important Considerations for PythonAnywhere
+
+**Rate Limiting:**
+- Free accounts share IP addresses
+- IP-based rate limiting may affect multiple users
+- Consider using session-based rate limiting if needed
+
+**File Storage:**
+- Free tier: 512MB disk space
+- Your immediate cleanup after download is CRITICAL
+- Monitor disk usage regularly in the "Files" tab
+
+**python-magic Dependency:**
+`python-magic` may not work on PythonAnywhere. If you encounter issues:
+
+1. Update `validator.py` to use `imghdr` instead:
+
+```python
+import imghdr
+
+def validate_image_file(file, allowed_extensions, max_size_bytes):
+    """Validate image file using imghdr (PythonAnywhere compatible)"""
+    # Check file extension
+    if '.' not in file.filename:
+        return False, "No file extension"
+
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext not in allowed_extensions:
+        return False, f"Extension .{ext} not allowed"
+
+    # Read file header for validation
+    file.seek(0)
+    header = file.read(512)
+    file.seek(0)
+
+    # Validate with imghdr
+    image_type = imghdr.what(None, header)
+
+    if image_type not in ['jpeg', 'png', 'webp']:
+        return False, "Invalid image file"
+
+    # Check file size
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+
+    if size > max_size_bytes:
+        return False, f"File too large (max {max_size_bytes/1024/1024}MB)"
+
+    return True, "Valid"
+```
+
+**Viewing Logs:**
+- **Error log**: `/var/log/yourusername.pythonanywhere.com.error.log`
+- **Server log**: `/var/log/yourusername.pythonanywhere.com.server.log`
+- Access logs available in the Web tab
+
+**Common Issues:**
+1. **Import errors**: Verify virtual environment path is correct
+2. **Static files not loading**: Check static files mapping
+3. **Permission errors**: Ensure uploads directory has correct permissions
+4. **Module not found**: Make sure all dependencies are installed in venv
 
 ## API Endpoints
 

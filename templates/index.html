@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Image Optimizer</h1>
+            <p class="subtitle">Compress JPEG, PNG & WebP images instantly</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <div id="uploadSection" class="upload-section">
+                <div id="dropZone" class="drop-zone">
+                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h3>Drag & Drop Image Here</h3>
+                    <p>or</p>
+                    <button id="browseBtn" class="btn-primary">Browse Files</button>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" hidden>
+                    <p class="file-info">Supports: JPEG, PNG, WebP • Max size: 25MB</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressBar" class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                    <p class="progress-text">Uploading and optimizing...</p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="previewSection" class="preview-section" style="display: none;">
+                <div class="comparison-container">
+                    <!-- Before Pane -->
+                    <div class="preview-pane">
+                        <h3>Before</h3>
+                        <div class="image-wrapper clickable-image" data-image-type="before">
+                            <img id="beforeImage" src="" alt="Original Image">
+                            <div class="zoom-hint">🔍 Click to zoom</div>
+                        </div>
+                        <div class="image-stats">
+                            <p><strong>Size:</strong> <span id="beforeSize">-</span></p>
+                            <p><strong>Dimensions:</strong> <span id="beforeDimensions">-</span></p>
+                            <p><strong>Format:</strong> <span id="beforeFormat">-</span></p>
+                        </div>
+                    </div>
+
+                    <!-- After Pane -->
+                    <div class="preview-pane">
+                        <h3>After</h3>
+                        <div class="image-wrapper clickable-image" id="afterImageWrapper" data-image-type="after">
+                            <div class="placeholder">
+                                <p>Processing...</p>
+                            </div>
+                            <img id="afterImage" src="" alt="Optimized Image" style="display: none;">
+                            <div class="zoom-hint">🔍 Click to zoom</div>
+                        </div>
+                        <div class="image-stats">
+                            <p><strong>Size:</strong> <span id="afterSize">-</span></p>
+                            <p><strong>Dimensions:</strong> <span id="afterDimensions">-</span></p>
+                            <p><strong>Saved:</strong> <span id="savedSize" class="highlight">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tip Message -->
+                <div id="tipMessage" class="tip-message" style="display: none;">
+                    💡 Tip: Adjust the settings below and click "Re-Optimize" to try different options without re-uploading!
+                </div>
+            </div>
+
+            <!-- Optimization Options (Hidden until image uploaded) -->
+            <div id="optionsPanel" class="options-panel" style="display: none;">
+                <h3>Optimization Options</h3>
+
+                <!-- Three Column Grid -->
+                <div class="options-grid">
+                    <!-- Column 1: Quality & Format -->
+                    <div class="option-column">
+                        <h4>Quality & Format</h4>
+
+                        <!-- Preset Selection -->
+                        <div class="option-group">
+                            <label for="presetSelect">Preset:</label>
+                            <select id="presetSelect" class="select-input">
+                                <option value="speed">Speed</option>
+                                <option value="balanced" selected>Balanced</option>
+                                <option value="max_quality">Max Quality</option>
+                            </select>
+                        </div>
+
+                        <!-- Quality Slider -->
+                        <div class="option-group">
+                            <label for="qualitySlider">
+                                Quality: <span id="qualityValue">85</span>
+                            </label>
+                            <input type="range" id="qualitySlider" min="1" max="95" value="85" class="slider">
+                            <p class="option-hint">JPEG/WebP quality</p>
+                        </div>
+
+                        <!-- Output Format -->
+                        <div class="option-group">
+                            <label for="outputFormat">Format:</label>
+                            <select id="outputFormat" class="select-input">
+                                <option value="same" selected>Keep Original</option>
+                                <option value="jpeg">→ JPEG</option>
+                                <option value="png">→ PNG</option>
+                                <option value="webp">→ WebP</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Size & Enhancement -->
+                    <div class="option-column">
+                        <h4>Size & Enhancement</h4>
+
+                        <!-- Resize Percentage -->
+                        <div class="option-group">
+                            <label for="resizePercent">
+                                Resize: <span id="resizeValue">100%</span>
+                            </label>
+                            <input type="range" id="resizePercent" min="10" max="200" value="100" class="slider">
+                            <p class="option-hint">Scale dimensions</p>
+                        </div>
+
+                        <!-- Sharpen Slider -->
+                        <div class="option-group">
+                            <label for="sharpenSlider">
+                                Sharpen: <span id="sharpenValue">0</span>
+                            </label>
+                            <input type="range" id="sharpenSlider" min="0" max="100" value="0" class="slider">
+                            <p class="option-hint">Enhance sharpness</p>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Metadata & Options -->
+                    <div class="option-column">
+                        <h4>Metadata & Options</h4>
+
+                        <!-- Checkboxes -->
+                        <div class="option-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="stripMetadata" checked>
+                                <span>Strip Metadata</span>
+                            </label>
+                            <p class="option-hint">Remove EXIF data</p>
+                        </div>
+
+                        <div class="option-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autoOrient" checked>
+                                <span>Auto-Orient</span>
+                            </label>
+                            <p class="option-hint">Fix rotation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applied Settings Accordion -->
+                <div id="appliedSettingsAccordion" class="accordion" style="display: none;">
+                    <button class="accordion-header" id="accordionToggle">
+                        <span>📋 Applied Settings</span>
+                        <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="accordion-content" id="accordionContent">
+                        <div class="details-grid">
+                            <div><strong>Preset:</strong> <span id="detailPreset">-</span></div>
+                            <div><strong>Quality:</strong> <span id="detailQuality">-</span></div>
+                            <div><strong>Resized:</strong> <span id="detailResize">-</span></div>
+                            <div><strong>Sharpened:</strong> <span id="detailSharpen">-</span></div>
+                            <div><strong>Format:</strong> <span id="detailFormat">-</span></div>
+                            <div><strong>Metadata:</strong> <span id="detailMetadata">-</span></div>
+                            <div><strong>Auto-Oriented:</strong> <span id="detailOrient">-</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Re-Optimize Progress -->
+                <div id="reoptimizeProgress" class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                    <p class="progress-text">Re-optimizing with new settings...</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="reoptimizeBtn" class="btn-reoptimize" style="display: none;">
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Re-Optimize
+                    </button>
+                    <button id="downloadBtn" class="btn-download" style="display: none;">
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download
+                    </button>
+                    <button id="resetBtn" class="btn-secondary" style="display: none;">
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        New Image
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Rate limit: 30 requests per minute per IP • Files deleted after download</p>
+        </footer>
+    </div>
+
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="zoom-modal" style="display: none;">
+        <div class="zoom-modal-content">
+            <button class="zoom-close" id="zoomCloseBtn">&times;</button>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
+                <button class="zoom-btn" id="zoomResetBtn" title="Reset">⟲</button>
+                <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+            </div>
+            <div class="zoom-image-container" id="zoomImageContainer">
+                <img id="zoomedImage" src="" alt="Zoomed Image">
+            </div>
+            <div class="zoom-info">
+                <span id="zoomLevel">100%</span> •
+                <span id="zoomImageType">Image</span> •
+                Drag to pan • Scroll to zoom
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

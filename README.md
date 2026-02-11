@@ -4,12 +4,13 @@ A production-ready Flask web application for optimizing JPEG, PNG, and WebP imag
 
 ## Theme
 
-pixel-craft features a vibrant, modern design with the following color palette:
-- **Bright Blue**: #51e2f5 - Primary interactive elements
-- **Border Blue Green**: #9df9ef - Borders and accents
-- **Background Ice Cold**: #a0d2eb - Page background
-- **Primary Pink Sand**: #ffa8b6 - Highlights and download actions
-- **Secondary Dark Sand**: #a28089 - Secondary actions and footer text
+pixel-craft features a clean, minimalist monochrome design with the following color palette:
+- **Primary Black**: #1a1a1a - Headers and primary elements
+- **Dark Grey**: #333333 - Primary buttons and interactive elements
+- **Medium Grey**: #757575 - Secondary text and elements
+- **Light Grey**: #e0e0e0 - Borders and dividers
+- **Very Light Grey**: #f5f5f5 - Background panels
+- **White**: #ffffff - Main surfaces
 
 ## Features
 

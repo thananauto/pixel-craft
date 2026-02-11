@@ -145,7 +145,14 @@ function init() {
     // Download button
     downloadBtn.addEventListener('click', () => {
         if (currentDownloadUrl) {
-            window.location.href = currentDownloadUrl;
+            // Create a temporary anchor element to trigger download
+            // without navigating away from the page
+            const link = document.createElement('a');
+            link.href = currentDownloadUrl;
+            link.download = ''; // This will use the filename from the server
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     });
 

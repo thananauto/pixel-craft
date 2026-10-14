@@ -1,10 +1,9 @@
 """
-Automatic cleanup module for temporary uploaded files.
+Cleanup module for temporary uploaded files.
 Removes old files from the upload directory.
 """
 import os
 import time
-import threading
 from flask import current_app
 
 
@@ -14,8 +13,6 @@ class FileCleanup:
     def __init__(self, app=None):
         """Initialize cleanup manager."""
         self.app = app
-        self._cleanup_thread = None
-        self._stop_event = threading.Event()
 
         if app is not None:
             self.init_app(app)
@@ -27,9 +24,6 @@ class FileCleanup:
         # Clean up orphaned files on startup
         with app.app_context():
             self.cleanup_old_files()
-
-        # Start background cleanup thread
-        self.start_background_cleanup()
 
     def cleanup_old_files(self):
         """Remove files older than configured age from upload folder."""
@@ -79,35 +73,3 @@ class FileCleanup:
                     current_app.logger.info(f"Removed file: {file_path}")
             except Exception as e:
                 current_app.logger.error(f"Error removing file {file_path}: {e}")
-
-    def _background_cleanup_task(self):
-        """Background task that runs periodic cleanup."""
-        interval = self.app.config['CLEANUP_INTERVAL_SECONDS']
-
-        while not self._stop_event.is_set():
-            # Wait for the interval or until stop event is set
-            if self._stop_event.wait(timeout=interval):
-                break
-
-            # Run cleanup within app context
-            with self.app.app_context():
-                self.cleanup_old_files()
-
-    def start_background_cleanup(self):
-        """Start the background cleanup thread."""
-        if self._cleanup_thread is None or not self._cleanup_thread.is_alive():
-            self._stop_event.clear()
-            self._cleanup_thread = threading.Thread(
-                target=self._background_cleanup_task,
-                daemon=True,
-                name="FileCleanupThread"
-            )
-            self._cleanup_thread.start()
-            self.app.logger.info("Background cleanup thread started")
-
-    def stop_background_cleanup(self):
-        """Stop the background cleanup thread."""
-        if self._cleanup_thread and self._cleanup_thread.is_alive():
-            self._stop_event.set()
-            self._cleanup_thread.join(timeout=5)
-            self.app.logger.info("Background cleanup thread stopped")

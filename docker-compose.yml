@@ -11,6 +11,7 @@ services:
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-please-change-this-secret-key-in-production}
+      - UPLOAD_FOLDER=/app/uploads
     volumes:
       - uploads:/app/uploads
     restart: unless-stopped

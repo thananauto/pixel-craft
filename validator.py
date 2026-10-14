@@ -3,9 +3,16 @@ File validation module for image uploads.
 Validates file types, extensions, and MIME types.
 """
 import os
-import magic
+from PIL import Image
 from werkzeug.utils import secure_filename
 from flask import current_app
+
+# Pillow format name -> canonical MIME type
+_PIL_FORMAT_TO_MIME = {
+    'JPEG': 'image/jpeg',
+    'PNG': 'image/png',
+    'WEBP': 'image/webp',
+}
 
 
 class FileValidator:
@@ -34,7 +41,8 @@ class FileValidator:
     @staticmethod
     def validate_mime_type(file_path):
         """
-        Validate the MIME type of an uploaded file using python-magic.
+        Validate the real file type of an uploaded file by sniffing its
+        image header with Pillow, rather than trusting the extension.
 
         Args:
             file_path (str): Path to the uploaded file
@@ -43,14 +51,16 @@ class FileValidator:
             tuple: (bool, str) - (is_valid, mime_type)
         """
         try:
-            mime = magic.Magic(mime=True)
-            mime_type = mime.from_file(file_path)
-
-            is_valid = mime_type in current_app.config['ALLOWED_MIME_TYPES']
-            return is_valid, mime_type
+            with Image.open(file_path) as img:
+                img.verify()
+                detected_format = img.format
         except Exception as e:
-            current_app.logger.error(f"Error detecting MIME type: {e}")
+            current_app.logger.error(f"Error detecting file type: {e}")
             return False, "unknown"
+
+        mime_type = _PIL_FORMAT_TO_MIME.get(detected_format, "unknown")
+        is_valid = mime_type in current_app.config['ALLOWED_MIME_TYPES']
+        return is_valid, mime_type
 
     @staticmethod
     def validate_file_size(file_path):

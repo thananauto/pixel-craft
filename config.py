@@ -10,7 +10,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
     # Upload settings
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+    # /tmp is the only writable path on Vercel's serverless filesystem
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp/uploads')
     MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # 25MB max file size
 
     # Allowed file extensions and MIME types
@@ -90,9 +91,6 @@ class Config:
     # File retention
     DELETE_AFTER_RESPONSE = True  # Delete files immediately after downloading
     DELETE_AFTER_UPLOAD = False  # Keep files after upload to allow re-optimization
-
-    # OpenCV availability flag (for future use)
-    OPENCV_AVAILABLE = True
 
     @staticmethod
     def init_app(app):

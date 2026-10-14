@@ -4,7 +4,7 @@ A production-ready Flask web application for optimizing JPEG, PNG, and WebP imag
 
 ## Live Demo
 
-🚀 **Try it now**: [https://thanan.pythonanywhere.com/](https://thanan.pythonanywhere.com/)
+🚀 **Try it now**: [pixel-craft](https://pixel-craft-504t.onrender.com/)
 
 The app is currently deployed and running on PythonAnywhere. Upload your images and see the optimization in action!
 

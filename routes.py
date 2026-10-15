@@ -18,6 +18,7 @@ def index():
     return render_template('index.html')
 
 
+
 @main_bp.route('/reoptimize', methods=['POST'])
 def reoptimize_image():
     """
